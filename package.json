@@ -1,0 +1,20 @@
+{
+  "name": "json",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "generate-pdf": "node generate-pdf.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "fs-extra": "^11.3.0",
+    "inquirer": "^12.5.0",
+    "pdf-lib": "^1.17.1",
+    "screenshot-desktop": "^1.15.1"
+  }
+}
