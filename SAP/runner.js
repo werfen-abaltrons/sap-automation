@@ -13,6 +13,14 @@ dotenv.config(); // Load environment variables
 const execPromise = promisify(exec);
 
 // === Load SAP credentials from environment variables ===
+const requiredEnvVars = ['SAP_USER', 'SAP_PASS'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    console.error(`❌ Missing environment variables: ${missingEnvVars.join(', ')}`);
+    process.exit(1);
+}
+
 const sapUser = process.env.SAP_USER;
 const sapPass = process.env.SAP_PASS;
 
@@ -46,7 +54,6 @@ const testcasePath = path.join(testFolder, 'testcases.json');
 if (fs.existsSync(testcasePath)) {
     try {
         const allTestcases = JSON.parse(fs.readFileSync(testcasePath, 'utf8'));
-
         if (allTestcases[testFileName]) {
             testCase = {
                 code: allTestcases[testFileName].code || 'N/A',
@@ -55,13 +62,18 @@ if (fs.existsSync(testcasePath)) {
                 expectedResults: allTestcases[testFileName].expectedResults || 'N/A',
             };
         } else {
-            console.error(`❌ Test case not found for: ${testFileName} in testcases.json`);
+            console.error(`❌ Test case not found in testcases.json for file: ${testFileName}`);
             process.exit(1);
         }
     } catch (e) {
         console.warn(`⚠️ Could not parse testcases.json in ${testFolder}:`, e.message);
+        process.exit(1);
     }
+} else {
+    console.error(`❌ testcases.json not found in: ${testFolder}`);
+    process.exit(1);
 }
+
 
 // === Ensure a test script path is provided ===
 if (!scriptPath) {
@@ -98,7 +110,7 @@ function ensureScriptWrapped(scriptPath) {
     if (!alreadyWrapped) {
         console.log(`🧰 Wrapping script for automation: ${scriptPath}`);
         // We overwrite the original script with the wrapped one
-        execSync(`node ./SAP/wrapScript.js "${scriptPath}"`, { stdio: 'inherit' });
+        execSync(`node ./SAP/wrapScript.js "${scriptPath}"`, {stdio: 'inherit'});
     }
 
     // Return the original path because it's already wrapped or just got wrapped
@@ -119,7 +131,7 @@ function isSAPRunning() {
 async function closeSAP() {
     console.log('🧹 Closing SAP GUI...');
     try {
-        const { stdout } = await execPromise('taskkill /IM saplogon.exe /F');
+        const {stdout} = await execPromise('taskkill /IM saplogon.exe /F');
         console.log('✅ SAP GUI closed.');
     } catch (error) {
         console.warn('⚠️ Could not close SAP GUI:', error.message);
@@ -170,7 +182,7 @@ function waitForSignalFlag() {
                 const [stepName, resultFlag] = content.split('||');
                 const isResult = resultFlag?.trim().toLowerCase() === 'true';
 
-                resolve({ stepName, isResult });
+                resolve({stepName, isResult});
             }
         }, 300);
     });
@@ -180,14 +192,26 @@ function waitForSignalFlag() {
 // === Take a screenshot and save metadata ===
 async function captureStep(stepName, isResult, index) {
     const imagePath = `${SCREENSHOTS_DIR}/screenshot${index + 1}.png`;
-    await screenshot({ filename: imagePath });
-    screenshots.push({ step: stepName, screenshotPath: imagePath, isResult });
+    await screenshot({filename: imagePath});
+    screenshots.push({step: stepName, screenshotPath: imagePath, isResult});
     console.log(`📸 Screenshot taken: ${stepName} (isResult: ${isResult})`);
 }
 
 
 // === Main E2E execution ===
 (async () => {
+
+    process.on('uncaughtException', (error) => {
+        console.error(`❌ Uncaught exception: ${error.message}`);
+        process.exit(1);
+    });
+
+    process.on('unhandledRejection', (reason) => {
+        console.error(`❌ Unhandled rejection: ${reason}`);
+        process.exit(1);
+    });
+
+
     const startTime = Date.now(); // Time tracking for duration
     let index = 0; // Screenshot index
 
@@ -205,10 +229,12 @@ async function captureStep(stepName, isResult, index) {
         const sapConn = process.env[sapConnKey];
 
         if (!sapConn) {
-            console.error(`❌ Missing SAP_${environment} in .env`);
+            console.error(`❌ Missing ${sapConnKey} in .env`);
             process.exit(1);
-        }else if (sapConn === 'ERP__PRD_CH1' || sapConn === 'ERP__PRD_SSO_CH1' || sapConn.includes('CH1')){
-            console.error(`❌ Access denied you can't execute CH1`);
+        }
+
+        if (sapConn.toUpperCase().includes('CH1')) {
+            console.error(`❌ Access denied: cannot execute against CH1`);
             process.exit(1);
         }
 
@@ -259,7 +285,7 @@ async function captureStep(stepName, isResult, index) {
 
             // === Screenshot step triggered from VBS ===
             if (fs.existsSync(SIGNAL_FLAG_PATH)) {
-                const { stepName, isResult } = await waitForSignalFlag();
+                const {stepName, isResult} = await waitForSignalFlag();
                 await captureStep(stepName, isResult, index);
                 index++;
             }
@@ -299,7 +325,6 @@ async function captureStep(stepName, isResult, index) {
             0.28,
             pdfOutputPath
         );
-
 
 
         console.log('📄 PDF report successfully generated 🎉');
