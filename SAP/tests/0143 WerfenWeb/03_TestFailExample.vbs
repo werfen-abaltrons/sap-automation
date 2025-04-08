@@ -15,7 +15,7 @@ Dim fso, failFlag, shouldFail
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 ' === Simulate condition (change to True or False to test) ===
-shouldFail = True  ' <-- Set to False to simulate a passing test
+shouldFail = True
 
 ' === Simulated test step ===
 WScript.Echo "Running test..."

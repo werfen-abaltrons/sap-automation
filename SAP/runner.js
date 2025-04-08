@@ -43,20 +43,32 @@ const testFolder = path.dirname(scriptPath);
 const testFileName = path.basename(scriptPath);
 
 let testCase = {
-    code: 'N/A',
     title: testFileName,
     description: 'N/A',
     expectedResults: 'N/A'
+};
+
+let globalMetadata = {
+    appName: 'UnknownApp',
+    document: 'UnknownDocument',
+    code: 'N/A'
 };
 
 const testcasePath = path.join(testFolder, 'testcases.json');
 
 if (fs.existsSync(testcasePath)) {
     try {
-        const allTestcases = JSON.parse(fs.readFileSync(testcasePath, 'utf8'));
+        const jsonContent = JSON.parse(fs.readFileSync(testcasePath, 'utf8'));
+        globalMetadata = {
+            appName: jsonContent.appName || 'UnknownApp',
+            document: jsonContent.document || 'UnknownDocument',
+            code: jsonContent.code || 'N/A'
+        };
+
+        const allTestcases = jsonContent.tests || {};
+
         if (allTestcases[testFileName]) {
             testCase = {
-                code: allTestcases[testFileName].code || 'N/A',
                 title: allTestcases[testFileName].title || testFileName,
                 description: allTestcases[testFileName].testCaseDescription || 'N/A',
                 expectedResults: allTestcases[testFileName].expectedResults || 'N/A',
@@ -65,6 +77,7 @@ if (fs.existsSync(testcasePath)) {
             console.error(`❌ Test case not found in testcases.json for file: ${testFileName}`);
             process.exit(1);
         }
+
     } catch (e) {
         console.warn(`⚠️ Could not parse testcases.json in ${testFolder}:`, e.message);
         process.exit(1);
@@ -73,6 +86,7 @@ if (fs.existsSync(testcasePath)) {
     console.error(`❌ testcases.json not found in: ${testFolder}`);
     process.exit(1);
 }
+
 
 
 // === Ensure a test script path is provided ===
@@ -308,8 +322,8 @@ async function captureStep(stepName, isResult, index) {
 
         await generatePdfReport(
             null,
-            testCase.code,
-            'SAP',
+            globalMetadata.code,
+            globalMetadata.appName,
             testCase.title,
             screenshots,
             {
@@ -321,10 +335,13 @@ async function captureStep(stepName, isResult, index) {
                 time: new Date().toLocaleTimeString(),
                 duration,
                 expectedResults: testCase.expectedResults,
+                document: globalMetadata.document,
             },
+            testFileName,
             0.28,
             pdfOutputPath
         );
+
 
 
         console.log('📄 PDF report successfully generated 🎉');

@@ -41,6 +41,9 @@ End If
 
 Set session = connection.Children(0)
 
+' === Minimize SAP GUI window ===
+session.findById("wnd[0]").iconify
+
 ' === Maximize and log in ===
 session.findById("wnd[0]").maximize
 WScript.Sleep 1000

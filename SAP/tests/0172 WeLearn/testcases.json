@@ -1,20 +1,22 @@
 {
-  "01_ListUserITRs.vbs": {
-    "code": "0172",
-    "title": "List_ITRs",
-    "testCaseDescription": "List 'Created ITR's' of the user ABALTRONS",
-    "expectedResults": "Table shows a list of ITR's created by ABALTRONS"
-  },
-  "02_StockConsultation.vbs": {
-    "code": "0172",
-    "title": "Stock_Consultation",
-    "testCaseDescription": "The system must display updated stock by warehouse for a given material.",
-    "expectedResults": "The results accurately reflect the stock per warehouse with no errors."
-  },
-  "03_SalesOrderEntry.vbs": {
-    "code": "0172",
-    "title": "Sales_Order_Entry",
-    "testCaseDescription": "Full process to enter a sales order in SAP GUI until final submission.",
-    "expectedResults": "The sales order was successfully entered with all required data and without errors."
+  "appName": "WeLearn",
+  "document": "ISD203839",
+  "code": "0178",
+  "tests": {
+    "01_ListUserITRs.vbs": {
+      "title": "List User ITRs",
+      "testCaseDescription": "List 'Created ITR's' of the user ABALTRONS",
+      "expectedResults": "Table shows a list of ITR's created by ABALTRONS"
+    },
+    "02_StockConsultation.vbs": {
+      "title": "Stock Consultation",
+      "testCaseDescription": "The system must display updated stock by warehouse for a given material.",
+      "expectedResults": "The results accurately reflect the stock per warehouse with no errors."
+    },
+    "03_SalesOrderEntry.vbs": {
+      "title": "Sales Order Entry",
+      "testCaseDescription": "Full process to enter a sales order in SAP GUI until final submission.",
+      "expectedResults": "The sales order was successfully entered with all required data and without errors."
+    }
   }
 }

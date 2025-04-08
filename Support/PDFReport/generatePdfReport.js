@@ -6,14 +6,22 @@ import path from 'path';
 /**
  * Generates a PDF report with multiple UI screenshots.
  */
-async function generatePdfReport(page, processNum, appName, testName, screenshots, generalInfo, imageScale = 0.32, evidenceFolder = 'test-pdf-report') {
+async function generatePdfReport(page, processNum, appName, testName, screenshots, generalInfo, originalScriptName, imageScale = 0.32, evidenceFolder = 'test-pdf-report') {
     try {
         console.log('Starting PDF report generation...');
 
-        const processAppName = appName + ' ' + processNum;
+        const processAppName = processNum + ' ' + appName;
+
+        const testNumber = originalScriptName?.slice(0, 2) || '00';
+        const documentCode = generalInfo.document || processNum || 'DOC';
+        const pdfFileName = `${documentCode}_${testNumber}.pdf`;
+        const fullTestLabel = `${testNumber} - ${testName}`;
+
+
         const folderPath = path.resolve(evidenceFolder);
         await fs.ensureDir(folderPath);
-        const pdfPath = path.join(folderPath, `${processNum}_${testName}.pdf`);
+        const pdfPath = path.join(folderPath, pdfFileName);
+
 
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont('Helvetica');
@@ -28,12 +36,15 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
         firstPage.drawImage(logoImage, {
             x: 20,
             y: 780,
-            width: 200,
-            height: 40,
+            width: 150,
+            height: 30,
         });
 
-        firstPage.drawText('>> Process: ', {x: 50, y: 700, size: 12, font: boldFont});
-        firstPage.drawText(processAppName, {x: 150, y: 700, size: 12});
+        firstPage.drawText('>> Process: ', {x: 50, y: 720, size: 12, font: boldFont});
+        firstPage.drawText(processAppName, {x: 150, y: 720, size: 12});
+
+        firstPage.drawText('>> Test:', {x: 50, y: 700, size: 12, font: boldFont});
+        firstPage.drawText(fullTestLabel, {x: 150, y: 700, size: 12});
 
         firstPage.drawText('>> Test Case Description:', {x: 50, y: 680, size: 12, font: boldFont});
         wrapText(firstPage, generalInfo.testCaseDescription, 150, 660, 12, font);
@@ -57,6 +68,7 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
         firstPage.drawText('Expected results have been matched:', {x: 70, y: 460, size: 12});
         wrapText(firstPage, generalInfo.expectedResults, 100, 440, 12, font);
 
+
         let index = 1;
 
         for (const {step, screenshotPath, isResult} of screenshots) {
@@ -68,8 +80,8 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
             pdfPage.drawImage(logoImage, {
                 x: 20,
                 y: 780,
-                width: 200,
-                height: 40,
+                width: 150,
+                height: 30,
             });
 
             drawActivitySection(pdfPage, index, step, image, font, boldFont, imageScale, isResult);
@@ -146,8 +158,8 @@ function drawActivitySection(pdfPage, index, step, image, font, boldFont, imageS
     const lineHeight = 16;
     const lines = splitTextByLength(step, 80); // You can adjust max length here
 
-    const label = isResult ? 'Result' : 'Activity';
-    pdfPage.drawText(`${label}:`, {
+    const labelText = isResult ? 'Result:' : `Activity ${index}:`;
+    pdfPage.drawText(labelText, {
         x: 40,
         y: 700,
         size: 14,
