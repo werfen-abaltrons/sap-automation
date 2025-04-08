@@ -73,15 +73,6 @@ Sub CreateFailFlag(reason)
 End Sub
 ```
 
-Inject it in each `.vbs` test like this:
-
-```vbscript
-Set f = fso.OpenTextFile("C:\path\to\SAP\scripts\helpers.vbs", 1)
-helperCode = f.ReadAll
-f.Close
-ExecuteGlobal helperCode
-```
-
 ---
 
 ## 🌐 Environment Configuration
