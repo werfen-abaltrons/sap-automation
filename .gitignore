@@ -43,5 +43,8 @@ coverage/
 # Optional: local config files
 *.local
 
+# SAP APP Development
 SAP/scriptGenerator
 SAP/generateScript.js
+runAssistant.vbs
+startAssistant.bat
