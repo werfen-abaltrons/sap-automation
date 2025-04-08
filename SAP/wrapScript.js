@@ -1,8 +1,6 @@
 // wrapScript.js
 // Wraps a raw SAP .vbs script with helpers, signals, and END flag
-
 import fs from 'fs';
-import path from 'path';
 
 const inputPath = process.argv[2];
 

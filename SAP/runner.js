@@ -54,6 +54,9 @@ if (fs.existsSync(testcasePath)) {
                 description: allTestcases[testFileName].testCaseDescription || 'N/A',
                 expectedResults: allTestcases[testFileName].expectedResults || 'N/A',
             };
+        } else {
+            console.error(`❌ Test case not found for: ${testFileName} in testcases.json`);
+            process.exit(1);
         }
     } catch (e) {
         console.warn(`⚠️ Could not parse testcases.json in ${testFolder}:`, e.message);
@@ -203,6 +206,9 @@ async function captureStep(stepName, isResult, index) {
 
         if (!sapConn) {
             console.error(`❌ Missing SAP_${environment} in .env`);
+            process.exit(1);
+        }else if (sapConn === 'ERP__PRD_CH1' || sapConn === 'ERP__PRD_SSO_CH1' || sapConn.includes('CH1')){
+            console.error(`❌ Access denied you can't execute CH1`);
             process.exit(1);
         }
 

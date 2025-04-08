@@ -38,6 +38,6 @@ RequestScreenshot "Menu is opened"
 
 ' === Create END flag ===
 Dim fileEnd
-Set fileEnd = fso.CreateTextFile("C:\SAP-CAPTURES\end.flag", True)
+Set fileEnd = fso.CreateTextFile("SAP/SAP-CAPTURES/end.flag", True)
 fileEnd.WriteLine "END"
 fileEnd.Close
