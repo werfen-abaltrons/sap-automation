@@ -42,3 +42,6 @@ coverage/
 
 # Optional: local config files
 *.local
+
+SAP/scriptGenerator
+SAP/generateScript.js

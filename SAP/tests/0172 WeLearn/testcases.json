@@ -1,18 +1,18 @@
 {
   "01_ListUserITRs.vbs": {
-    "code": "0143",
+    "code": "0172",
     "title": "List_ITRs",
     "testCaseDescription": "List 'Created ITR's' of the user ABALTRONS",
     "expectedResults": "Table shows a list of ITR's created by ABALTRONS"
   },
   "02_StockConsultation.vbs": {
-    "code": "SAP1002",
+    "code": "0172",
     "title": "Stock_Consultation",
     "testCaseDescription": "The system must display updated stock by warehouse for a given material.",
     "expectedResults": "The results accurately reflect the stock per warehouse with no errors."
   },
   "03_SalesOrderEntry.vbs": {
-    "code": "SAP1003",
+    "code": "0172",
     "title": "Sales_Order_Entry",
     "testCaseDescription": "Full process to enter a sales order in SAP GUI until final submission.",
     "expectedResults": "The sales order was successfully entered with all required data and without errors."

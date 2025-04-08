@@ -9,7 +9,6 @@ f.Close
 ExecuteGlobal helperCode
 
 ' === Original SAP Script ===
-' === Original SAP Script ===
 If Not IsObject(application) Then
    Set SapGuiAuto  = GetObject("SAPGUI")
    Set application = SapGuiAuto.GetScriptingEngine

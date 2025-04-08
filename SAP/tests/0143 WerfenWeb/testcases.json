@@ -1,6 +1,6 @@
 {
   "01_ListUserITRs.vbs": {
-    "code": "0143",
+    "code": "SAP0143",
     "title": "List_ITRs",
     "testCaseDescription": "List 'Created ITR's' of the user ABALTRONS",
     "expectedResults": "Table shows a list of ITR's created by ABALTRONS"

@@ -131,6 +131,7 @@ function cleanSapCaptureFolder() {
     if (fs.existsSync(folderPath)) {
         const files = fs.readdirSync(folderPath);
         for (const file of files) {
+            if (file === '.gitkeep') continue;
             const filePath = `${folderPath}/${file}`;
             try {
                 fs.unlinkSync(filePath);

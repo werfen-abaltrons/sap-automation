@@ -10,10 +10,10 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
     try {
         console.log('Starting PDF report generation...');
 
-        const processAppName = processNum + ' ' + appName;
+        const processAppName = appName + ' ' + processNum;
         const folderPath = path.resolve(evidenceFolder);
         await fs.ensureDir(folderPath);
-        const pdfPath = path.join(folderPath, `${appName}_${testName}.pdf`);
+        const pdfPath = path.join(folderPath, `${processNum}_${testName}.pdf`);
 
         const pdfDoc = await PDFDocument.create();
         const font = await pdfDoc.embedFont('Helvetica');
