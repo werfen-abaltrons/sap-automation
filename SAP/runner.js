@@ -47,7 +47,6 @@ if (fs.existsSync(testcasePath)) {
     try {
         const allTestcases = JSON.parse(fs.readFileSync(testcasePath, 'utf8'));
 
-        // Soporta testcases como objeto tipo { "01_ListUserITRs.vbs": { ... } }
         if (allTestcases[testFileName]) {
             testCase = {
                 code: allTestcases[testFileName].code || 'N/A',
@@ -79,7 +78,7 @@ const LOGIN_SCRIPT_PATH = 'SAP/scripts/openSAP.vbs';
 const SIGNAL_FLAG_PATH = 'SAP/SAP-CAPTURES/signal.flag';
 const END_FLAG_PATH = 'SAP/SAP-CAPTURES/end.flag';
 const SCREENSHOTS_DIR = './evidence';
-const screenshots = []; // Array of all steps with images
+const screenshots = [];
 
 // === Create screenshots folder if not exists ===
 if (!fs.existsSync(SCREENSHOTS_DIR)) {
@@ -199,31 +198,8 @@ async function captureStep(stepName, isResult, index) {
         }
 
         // === Resolve SAP connection from environment name ===
-        let sapConn = null;
-
-        switch (environment.toUpperCase()) {
-            case 'CH1':
-                sapConn = process.env.SAP_CH1;
-                break;
-            case 'CH2':
-                sapConn = process.env.SAP_CH2;
-                break;
-            case 'IZ4':
-                sapConn = process.env.SAP_IZ4;
-                break;
-            case 'SANDBOX1':
-                sapConn = process.env.SAP_SANDBOX1;
-                break;
-            case 'SANDBOX2':
-                sapConn = process.env.SAP_SANDBOX2;
-                break;
-            case 'SANDBOX3':
-                sapConn = process.env.SAP_SANDBOX3;
-                break;
-            default:
-                console.error(`❌ Unknown environment: ${environment}`);
-                process.exit(1);
-        }
+        const sapConnKey = `SAP_${environment.toUpperCase()}`;
+        const sapConn = process.env[sapConnKey];
 
         if (!sapConn) {
             console.error(`❌ Missing SAP_${environment} in .env`);
