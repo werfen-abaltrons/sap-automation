@@ -21,7 +21,9 @@ This automation handles the full E2E testing lifecycle:
 ```
 /SAP
 ├── runner.js                  # Main automation runner
-├── .env                       # SAP_USER, SAP_PASS, SAP_<ENV>
+├── runAll.js                  # Executes all test scripts in batch mode
+├── ui.js                      # Launches the ui terminal mode
+├── wrapScript.js              # Enhances base .vbs scripts by injecting capture prompts
 ├── /tests                     # Folder with subfolders per test group
 │   └── 0143 SomeTestGroup/
 │       ├── 01_MyTest.vbs
@@ -33,6 +35,11 @@ This automation handles the full E2E testing lifecycle:
 ├── /pdf                       # PDF reports
 │   └── 0143 SomeTestGroup/
 │       └── SAP_MyTest.pdf
+
+/.env                          # SAP_USER, SAP_PASS, SAP_<ENV>
+
+/package.json                  # NPM dependencies and scripts
+/package-lock.json             # NPM lockfile
 ```
 
 ---
@@ -82,8 +89,12 @@ In your `.env` file:
 ```
 SAP_USER=yourUser
 SAP_PASS=yourPassword
-SAP_CH1=ERP__PRD_CH1
-SAP_SANDBOX1=ERP_SANDBOX1
+SAP_CH1='ERP__PRD_CH1'
+SAP_CH2='ERP_QAS_CH2'
+SAP_IZ4='ERP_DEV_IZ4'
+SAP_SANDBOX1='OTH_SB1'
+SAP_SANDBOX2='OTH_SB2'
+SAP_SANDBOX3='OTH_SB3'
 ```
 
 When launching a test, the runner will pass the right environment to `openSAP.vbs` as `SAP_CONN`.
