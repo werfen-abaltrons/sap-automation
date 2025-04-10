@@ -36,8 +36,8 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
         firstPage.drawImage(logoImage, {
             x: 20,
             y: 780,
-            width: 150,
-            height: 30,
+            width: 125,
+            height: 25,
         });
 
         firstPage.drawText('>> Process: ', {x: 50, y: 720, size: 12, font: boldFont});
@@ -80,8 +80,8 @@ async function generatePdfReport(page, processNum, appName, testName, screenshot
             pdfPage.drawImage(logoImage, {
                 x: 20,
                 y: 780,
-                width: 150,
-                height: 30,
+                width: 125,
+                height: 25,
             });
 
             drawActivitySection(pdfPage, index, step, image, font, boldFont, imageScale, isResult);

@@ -5,9 +5,15 @@ import {promisify} from 'util'; // To convert exec to a Promise
 import screenshot from 'screenshot-desktop'; // To take screenshots of the whole screen
 import generatePdfReport from '../Support/PDFReport/generatePdfReport.js'; // Custom function to generate PDF with steps
 import formatDuration from '../Support/PDFReport/formatDuration.js'; // Utility to format duration as string
+import { captureStep, screenshots } from '../Support/PDFReport/captureStep.js';
 import dotenv from 'dotenv';
 import path from "path"; // To load environment variables from .env file
 dotenv.config(); // Load environment variables
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // === Promisify exec so we can use await with it ===
 const execPromise = promisify(exec);
@@ -49,9 +55,9 @@ let testCase = {
 };
 
 let globalMetadata = {
-    appName: 'UnknownApp',
+    processName: 'UnknownApp',
     document: 'UnknownDocument',
-    code: 'N/A'
+    processCode: 'N/A'
 };
 
 const testcasePath = path.join(testFolder, 'testcases.json');
@@ -60,9 +66,9 @@ if (fs.existsSync(testcasePath)) {
     try {
         const jsonContent = JSON.parse(fs.readFileSync(testcasePath, 'utf8'));
         globalMetadata = {
-            appName: jsonContent.appName || 'UnknownApp',
+            processName: jsonContent.processName || 'UnknownApp',
             document: jsonContent.document || 'UnknownDocument',
-            code: jsonContent.code || 'N/A'
+            processCode: jsonContent.processCode || 'N/A'
         };
 
         const allTestcases = jsonContent.tests || {};
@@ -106,8 +112,7 @@ if (!sapUser || !sapPass) {
 const LOGIN_SCRIPT_PATH = 'SAP/scripts/openSAP.vbs';
 const SIGNAL_FLAG_PATH = 'SAP/SAP-CAPTURES/signal.flag';
 const END_FLAG_PATH = 'SAP/SAP-CAPTURES/end.flag';
-const SCREENSHOTS_DIR = './evidence';
-const screenshots = [];
+const SCREENSHOTS_DIR = path.resolve(__dirname, '../evidence');
 
 // === Create screenshots folder if not exists ===
 if (!fs.existsSync(SCREENSHOTS_DIR)) {
@@ -155,7 +160,7 @@ async function closeSAP() {
 
 // === Delete all flags from SAP-CAPTURES folder ===
 function cleanSapCaptureFolder() {
-    const folderPath = 'SAP/SAP-CAPTURES';
+    const folderPath = './SAP-CAPTURES';
     if (fs.existsSync(folderPath)) {
         const files = fs.readdirSync(folderPath);
         for (const file of files) {
@@ -202,13 +207,8 @@ function waitForSignalFlag() {
     });
 }
 
-
-// === Take a screenshot and save metadata ===
-async function captureStep(stepName, isResult, index) {
-    const imagePath = `${SCREENSHOTS_DIR}/screenshot${index + 1}.png`;
-    await screenshot({filename: imagePath});
-    screenshots.push({step: stepName, screenshotPath: imagePath, isResult});
-    console.log(`📸 Screenshot taken: ${stepName} (isResult: ${isResult})`);
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
@@ -322,8 +322,8 @@ async function captureStep(stepName, isResult, index) {
 
         await generatePdfReport(
             null,
-            globalMetadata.code,
-            globalMetadata.appName,
+            globalMetadata.processCode,
+            globalMetadata.processName,
             testCase.title,
             screenshots,
             {
@@ -353,6 +353,6 @@ async function captureStep(stepName, isResult, index) {
         // === Clean up no matter what ===
         await new Promise(resolve => setTimeout(resolve, 1000));
         await closeSAP(); // Close SAP even on error
-        cleanSapCaptureFolder(); // Delete flag files
+        await cleanSapCaptureFolder(); // Delete flag files
     }
 })();

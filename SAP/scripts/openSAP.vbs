@@ -45,7 +45,7 @@ Set session = connection.Children(0)
 session.findById("wnd[0]").iconify
 
 ' === Maximize and log in ===
-session.findById("wnd[0]").maximize
+session.findById("wnd[0]").resizeWorkingPane 320, 80, 0
 WScript.Sleep 1000
 session.findById("wnd[0]/usr/txtRSYST-BNAME").text = sapUser
 session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = sapPass

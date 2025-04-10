@@ -1,7 +1,7 @@
 {
-  "appName": "WerfenWeb",
+  "processCode": "0143",
+  "processName": "WerfenWeb",
   "document": "ISD203839",
-  "code": "0143",
   "tests": {
     "01_ListUserITRs.vbs": {
       "title": "List ITRs",
