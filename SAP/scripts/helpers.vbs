@@ -3,6 +3,8 @@
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 Sub RequestScreenshot(stepName, typeLabel)
+    WScript.Sleep 500
+
     Dim isResult
     Dim label
 
@@ -25,7 +27,7 @@ Sub RequestScreenshot(stepName, typeLabel)
     Set flag = fso.CreateTextFile("SAP/SAP-CAPTURES/signal.flag", True)
     flag.WriteLine stepName & "||" & CStr(isResult)
     flag.Close
-    WScript.Sleep 1500
+    WScript.Sleep 2000
 End Sub
 
 

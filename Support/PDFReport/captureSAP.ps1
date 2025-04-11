@@ -4,41 +4,55 @@ param (
 
 # === Define native WinAPI functions ===
 Add-Type @"
-  using System;
-  using System.Runtime.InteropServices;
-  using System.Text;
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
 
-  public class WinAPI {
-    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-    [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+public class WinAPI {
+  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+  [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
 
-    public struct RECT {
-      public int Left;
-      public int Top;
-      public int Right;
-      public int Bottom;
-    }
+  public struct RECT {
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
+  }
 }
 "@
 
-# === Get the current active window handle ===
-function Get-ForegroundHandle {
-  return [WinAPI]::GetForegroundWindow()
+# === Get SAP GUI session handle (descarta SAP Logon) ===
+function Get-SAPHandle {
+  $sapProcs = Get-Process | Where-Object {
+    $_.Name -like "sap*" -and $_.MainWindowHandle -ne 0
+  }
+
+  foreach ($proc in $sapProcs) {
+    $builder = New-Object System.Text.StringBuilder 1024
+    [WinAPI]::GetWindowText([intptr]$proc.MainWindowHandle, $builder, $builder.Capacity) | Out-Null
+    $title = $builder.ToString()
+
+    if ($title -notlike "*SAP Logon*") {
+      return $proc.MainWindowHandle
+    }
+  }
+
+  return $null
 }
 
-# === Get window title (for debugging/logging) ===
+# === Get window title (for logging) ===
 function Get-WindowTitle($handle) {
   $builder = New-Object System.Text.StringBuilder 1024
-  [WinAPI]::GetWindowText($handle, $builder, $builder.Capacity) | Out-Null
+  [WinAPI]::GetWindowText([intptr]$handle, $builder, $builder.Capacity) | Out-Null
   return $builder.ToString()
 }
 
-# === Capture a window and save to file ===
+# === Capture window ===
 function Capture-Window($handle, $outputPath) {
   $rect = New-Object WinAPI+RECT
-  [WinAPI]::GetWindowRect($handle, [ref]$rect) | Out-Null
+  [WinAPI]::GetWindowRect([intptr]$handle, [ref]$rect) | Out-Null
 
   $width  = $rect.Right - $rect.Left
   $height = $rect.Bottom - $rect.Top
@@ -53,37 +67,31 @@ function Capture-Window($handle, $outputPath) {
   $bmp.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
 }
 
-# === Try to get the active window (retry up to 5 times) ===
-$sapHandle = $null
-$attempt = 0
-while ($attempt -lt 5 -and ($sapHandle -eq 0 -or $sapHandle -eq $null)) {
-  $sapHandle = Get-ForegroundHandle
-  if ($sapHandle -eq 0 -or $sapHandle -eq $null) {
-    Start-Sleep -Milliseconds 1000
-    $attempt++
-  }
-}
+# === Main logic ===
+$sapHandle = Get-SAPHandle
 
-# === Fail if no window found ===
-if ($sapHandle -eq 0 -or $sapHandle -eq $null) {
-  Write-Error "Could not detect any foreground window after 5 attempts"
+if ($sapHandle -eq $null -or $sapHandle -eq 0) {
+  Write-Error "❌ No se pudo encontrar una ventana de SAP válida (distinta a SAP Logon)"
   exit 1
 }
 
-# === Bring window to front (just in case) ===
-[WinAPI]::SetForegroundWindow($sapHandle)
-Start-Sleep -Milliseconds 300
+# === Check if the window is minimized ===
+if ([WinAPI]::IsIconic([intptr]$sapHandle)) {
+  Write-Warning "⚠️ La ventana de SAP está minimizada. No se puede capturar correctamente. Maximízala primero."
+  exit 1
+}
 
-# === Optional: log window title being captured ===
+[WinAPI]::SetForegroundWindow([intptr]$sapHandle)
+Start-Sleep -Milliseconds 500
+
 $title = Get-WindowTitle $sapHandle
-Write-Output "Capturing window: '$title'"
+Write-Output "🪟 Capturando ventana de SAP: '$title' "
 
-# === Capture and save ===
 try {
   Capture-Window $sapHandle $outputFile
-  Write-Output "Capture successful: $outputFile"
+  Write-Output "✅ Captura guardada en: $outputFile"
   exit 0
 } catch {
-  Write-Error "Exception during capture: $_"
+  Write-Error "❌ Error durante la captura: $_"
   exit 1
 }
