@@ -27,6 +27,28 @@ function getTestFilesInFolder(folder) {
 
 // === Main logic ===
 async function runPrompt() {
+
+    // === REQUEST USER AND PASSWORD FIRST ===
+    const { user, password } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'user',
+            message: '👤 Enter your SAP username:',
+            validate: input => input.trim() !== '' || 'Username cannot be empty',
+        },
+        {
+            type: 'password',
+            name: 'password',
+            message: '🔒 Enter your SAP password:',
+            mask: '*',
+            validate: input => input.trim() !== '' || 'Password cannot be empty',
+        },
+    ]);
+
+    // Store them in environment variables for use in other parts
+    process.env.SAP_USER = user;
+    process.env.SAP_PASS = password;
+
     const { mode } = await inquirer.prompt([
         {
             type: 'list',
